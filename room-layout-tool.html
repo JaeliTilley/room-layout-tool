@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Studio Space Planner | Interior Layout Tool</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Libre+Franklin:wght@300;400;500&display=swap');
+        
+        :root {
+            --sage: #84B59F;
+            --eucalyptus: #69A297;
+            --slate: #50808E;
+            --cream: #F5F5F5;
+            --charcoal: #2F2F2F;
+            --white: #FFFFFF;
+            --shadow: rgba(47, 47, 47, 0.1);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Libre Franklin', sans-serif;
+            background: linear-gradient(135deg, var(--cream) 0%, #e8ebe8 100%);
+            color: var(--charcoal);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+            animation: fadeInDown 0.8s ease-out;
+        }
+        
+        h1 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 3.5rem;
+            font-weight: 300;
+            color: var(--slate);
+            margin-bottom: 0.5rem;
+            letter-spacing: 0.02em;
+        }
+        
+        .subtitle {
+            font-size: 1rem;
+            color: var(--eucalyptus);
+            font-weight: 300;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+        
+        .main-grid {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 2rem;
+            animation: fadeIn 1s ease-out 0.2s both;
+        }
+        
+        .sidebar {
+            background: var(--white);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px var(--shadow);
+            height: fit-content;
+        }
+        
+        .sidebar h2 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.8rem;
+            font-weight: 400;
+            color: var(--slate);
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.8rem;
+            border-bottom: 1px solid var(--sage);
+        }
+        
+        .furniture-category {
+            margin-bottom: 1.5rem;
+        }
+        
+        .category-title {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--eucalyptus);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 0.8rem;
+        }
+        
+        .furniture-item {
+            background: var(--cream);
+            padding: 0.8rem 1rem;
+            margin-bottom: 0.6rem;
+            border-radius: 8px;
+            cursor: move;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+        
+        .furniture-item:hover {
+            background: var(--sage);
+            color: var(--white);
+            border-color: var(--eucalyptus);
+            transform: translateX(4px);
+        }
+        
+        .furniture-item .dimensions {
+            font-size: 0.75rem;
+            opacity: 0.7;
+            margin-top: 0.3rem;
+        }
+        
+        .canvas-area {
+            background: var(--white);
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px var(--shadow);
+            min-height: 600px;
+        }
+        
+        .canvas-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--cream);
+        }
+        
+        .canvas-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.5rem;
+            color: var(--slate);
+        }
+        
+        .room-info {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.85rem;
+            color: var(--eucalyptus);
+        }
+        
+        .clear-btn {
+            background: var(--slate);
+            color: var(--white);
+            border: none;
+            padding: 0.6rem 1.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: 'Libre Franklin', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            letter-spacing: 0.05em;
+        }
+        
+        .clear-btn:hover {
+            background: var(--charcoal);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(47, 47, 47, 0.2);
+        }
+        
+        #roomCanvas {
+            background: #FAFAFA;
+            border: 2px solid var(--cream);
+            border-radius: 8px;
+            cursor: crosshair;
+            position: relative;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--cream);
+            padding: 0.8rem 1.2rem;
+            border-radius: 8px;
+        }
+        
+        .control-group label {
+            font-size: 0.85rem;
+            color: var(--charcoal);
+            font-weight: 500;
+        }
+        
+        .control-group input {
+            width: 80px;
+            padding: 0.4rem;
+            border: 1px solid var(--sage);
+            border-radius: 4px;
+            font-family: 'Libre Franklin', sans-serif;
+            font-size: 0.85rem;
+        }
+        
+        .instructions {
+            background: linear-gradient(135deg, var(--sage) 0%, var(--eucalyptus) 100%);
+            color: var(--white);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-top: 2rem;
+            animation: slideUp 0.8s ease-out 0.4s both;
+        }
+        
+        .instructions h3 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.3rem;
+            margin-bottom: 0.8rem;
+            font-weight: 400;
+        }
+        
+        .instructions ul {
+            list-style: none;
+            font-size: 0.9rem;
+            line-height: 1.8;
+        }
+        
+        .instructions li:before {
+            content: "→ ";
+            margin-right: 0.5rem;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(132, 181, 159, 0.3);
+            font-size: 0.85rem;
+            color: var(--eucalyptus);
+        }
+        
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 2.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Studio Space Planner</h1>
+            <p class="subtitle">Interactive Room Layout Design Tool</p>
+        </header>
+        
+        <div class="main-grid">
+            <aside class="sidebar">
+                <h2>Furniture Library</h2>
+                
+                <div class="furniture-category">
+                    <div class="category-title">Sleeping</div>
+                    <div class="furniture-item" draggable="true" data-width="80" data-height="60" data-color="#B85042">
+                        Queen Bed
+                        <div class="dimensions">80" × 60"</div>
+                    </div>
+                    <div class="furniture-item" draggable="true" data-width="75" data-height="54" data-color="#A7727D">
+                        Full Bed
+                        <div class="dimensions">75" × 54"</div>
+                    </div>
+                    <div class="furniture-item" draggable="true" data-width="80" data-height="20" data-color="#C9ADA7">
+                        Murphy Bed
+                        <div class="dimensions">80" × 20" (closed)</div>
+                    </div>
+                </div>
+                
+                <div class="furniture-category">
+                    <div class="category-title">Seating</div>
+                    <div class="furniture-item" draggable="true" data-width="84" data-height="36" data-color="#69A297">
+                        Sofa
+                        <div class="dimensions">84" × 36"</div>
+                    </div>
+                    <div class="furniture-item" draggable="true" data-width="36" data-height="36" data-color="#84B59F">
+                        Armchair
+                        <div class="dimensions">36" × 36"</div>
+                    </div>
+                    <div class="furniture-item" draggable="true" data-width="18" data-height="18" data-color="#A8DADC">
+                        Ottoman
+                        <div class="dimensions">18" × 18"</div>
+                    </div>
+                </div>
+                
+                <div class="furniture-category">
+                    <div class="category-title">Tables</div>
+                    <div class="furniture-item" draggable="true" data-width="48" data-height="30" data-color="#E07A5F">
+                        Desk
+                        <div class="dimensions">48" × 30"</div>
+                    </div>
+                    <div class="furniture-item" draggable="true" data-width="48" data-height="48" data-color="#F2CC8F">
+                        Dining Table
+                        <div class="dimensions">48" × 48"</div>
+                    </div>
+                    <div class="furniture-item" draggable="true" data-width="24" data-height="24" data-color="#81B29A">
+                        Coffee Table
+                        <div class="dimensions">24" × 24"</div>
+                    </div>
+                </div>
+                
+                <div class="furniture-category">
+                    <div class="category-title">Storage</div>
+                    <div class="furniture-item" draggable="true" data-width="36" data-height="18" data-color="#50808E">
+                        Bookshelf
+                        <div class="dimensions">36" × 18"</div>
+                    </div>
+                    <div class="furniture-item" draggable="true" data-width="60" data-height="24" data-color="#4A5F6D">
+                        Dresser
+                        <div class="dimensions">60" × 24"</div>
+                    </div>
+                    <div class="furniture-item" draggable="true" data-width="20" data-height="20" data-color="#6D8B74">
+                        Nightstand
+                        <div class="dimensions">20" × 20"</div>
+                    </div>
+                </div>
+            </aside>
+            
+            <main class="canvas-area">
+                <div class="canvas-header">
+                    <h2 class="canvas-title">400 sq ft Studio Layout</h2>
+                    <div class="room-info">
+                        <span>20' × 20'</span>
+                        <span>•</span>
+                        <span id="itemCount">0 items placed</span>
+                    </div>
+                    <button class="clear-btn" onclick="clearCanvas()">Clear All</button>
+                </div>
+                
+                <canvas id="roomCanvas" width="800" height="800"></canvas>
+                
+                <div class="controls">
+                    <div class="control-group">
+                        <label>Room Width (ft):</label>
+                        <input type="number" id="roomWidth" value="20" min="10" max="40" onchange="updateRoom()">
+                    </div>
+                    <div class="control-group">
+                        <label>Room Length (ft):</label>
+                        <input type="number" id="roomLength" value="20" min="10" max="40" onchange="updateRoom()">
+                    </div>
+                    <div class="control-group">
+                        <label>Scale:</label>
+                        <input type="range" id="scale" min="20" max="50" value="40" oninput="updateRoom()">
+                    </div>
+                </div>
+                
+                <div class="instructions">
+                    <h3>How to Use</h3>
+                    <ul>
+                        <li>Drag furniture from the library onto the canvas</li>
+                        <li>Click and drag placed items to reposition them</li>
+                        <li>Click on an item and press Delete to remove it</li>
+                        <li>Adjust room dimensions using the controls below</li>
+                        <li>Export your layout by taking a screenshot</li>
+                    </ul>
+                </div>
+            </main>
+        </div>
+        
+        <footer class="footer">
+            <p>Created by Jaeli Tilley | SDSU Computer Science</p>
+            <p style="margin-top: 0.5rem; font-size: 0.75rem;">Bridging Technology & Interior Design</p>
+        </footer>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('roomCanvas');
+        const ctx = canvas.getContext('2d');
+        let scale = 40; // pixels per foot
+        let roomWidth = 20; // feet
+        let roomLength = 20; // feet
+        let furnitureItems = [];
+        let selectedItem = null;
+        let isDragging = false;
+        let dragOffset = { x: 0, y: 0 };
+
+        function updateRoom() {
+            roomWidth = parseInt(document.getElementById('roomWidth').value);
+            roomLength = parseInt(document.getElementById('roomLength').value);
+            scale = parseInt(document.getElementById('scale').value);
+            
+            // Update canvas size
+            canvas.width = roomWidth * scale;
+            canvas.height = roomLength * scale;
+            
+            drawRoom();
+        }
+
+        function drawRoom() {
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw room background
+            ctx.fillStyle = '#FAFAFA';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw grid
+            ctx.strokeStyle = '#E8E8E8';
+            ctx.lineWidth = 1;
+            
+            // Vertical lines (every foot)
+            for (let i = 0; i <= roomWidth; i++) {
+                ctx.beginPath();
+                ctx.moveTo(i * scale, 0);
+                ctx.lineTo(i * scale, canvas.height);
+                ctx.stroke();
+            }
+            
+            // Horizontal lines
+            for (let i = 0; i <= roomLength; i++) {
+                ctx.beginPath();
+                ctx.moveTo(0, i * scale);
+                ctx.lineTo(canvas.width, i * scale);
+                ctx.stroke();
+            }
+            
+            // Draw border
+            ctx.strokeStyle = '#84B59F';
+            ctx.lineWidth = 4;
+            ctx.strokeRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw furniture
+            furnitureItems.forEach((item, index) => {
+                drawFurniture(item, item === selectedItem);
+            });
+            
+            // Update item count
+            document.getElementById('itemCount').textContent = `${furnitureItems.length} item${furnitureItems.length !== 1 ? 's' : ''} placed`;
+        }
+
+        function drawFurniture(item, isSelected) {
+            const widthPx = (item.width / 12) * scale; // convert inches to feet to pixels
+            const heightPx = (item.height / 12) * scale;
+            
+            // Shadow
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+            ctx.fillRect(item.x + 4, item.y + 4, widthPx, heightPx);
+            
+            // Furniture body
+            ctx.fillStyle = item.color;
+            ctx.fillRect(item.x, item.y, widthPx, heightPx);
+            
+            // Border
+            if (isSelected) {
+                ctx.strokeStyle = '#2F3C7E';
+                ctx.lineWidth = 3;
+            } else {
+                ctx.strokeStyle = '#FFFFFF';
+                ctx.lineWidth = 2;
+            }
+            ctx.strokeRect(item.x, item.y, widthPx, heightPx);
+            
+            // Label
+            ctx.fillStyle = '#FFFFFF';
+            ctx.font = '12px Libre Franklin, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(item.name, item.x + widthPx / 2, item.y + heightPx / 2);
+            
+            // Dimensions
+            ctx.font = '10px Libre Franklin, sans-serif';
+            ctx.fillText(`${item.width}" × ${item.height}"`, item.x + widthPx / 2, item.y + heightPx / 2 + 15);
+        }
+
+        function clearCanvas() {
+            furnitureItems = [];
+            selectedItem = null;
+            drawRoom();
+        }
+
+        // Drag and drop from sidebar
+        document.querySelectorAll('.furniture-item').forEach(item => {
+            item.addEventListener('dragstart', (e) => {
+                e.dataTransfer.setData('width', item.dataset.width);
+                e.dataTransfer.setData('height', item.dataset.height);
+                e.dataTransfer.setData('color', item.dataset.color);
+                e.dataTransfer.setData('name', item.textContent.split('\n')[0].trim());
+            });
+        });
+
+        canvas.addEventListener('dragover', (e) => {
+            e.preventDefault();
+        });
+
+        canvas.addEventListener('drop', (e) => {
+            e.preventDefault();
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            const furniture = {
+                x: x - 20,
+                y: y - 20,
+                width: parseInt(e.dataTransfer.getData('width')),
+                height: parseInt(e.dataTransfer.getData('height')),
+                color: e.dataTransfer.getData('color'),
+                name: e.dataTransfer.getData('name')
+            };
+            
+            furnitureItems.push(furniture);
+            drawRoom();
+        });
+
+        // Mouse interactions for moving furniture
+        canvas.addEventListener('mousedown', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            // Check if clicking on existing furniture
+            for (let i = furnitureItems.length - 1; i >= 0; i--) {
+                const item = furnitureItems[i];
+                const widthPx = (item.width / 12) * scale;
+                const heightPx = (item.height / 12) * scale;
+                
+                if (x >= item.x && x <= item.x + widthPx &&
+                    y >= item.y && y <= item.y + heightPx) {
+                    selectedItem = item;
+                    isDragging = true;
+                    dragOffset = {
+                        x: x - item.x,
+                        y: y - item.y
+                    };
+                    drawRoom();
+                    return;
+                }
+            }
+            
+            selectedItem = null;
+            drawRoom();
+        });
+
+        canvas.addEventListener('mousemove', (e) => {
+            if (isDragging && selectedItem) {
+                const rect = canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                selectedItem.x = x - dragOffset.x;
+                selectedItem.y = y - dragOffset.y;
+                
+                // Keep within bounds
+                selectedItem.x = Math.max(0, Math.min(selectedItem.x, canvas.width - (selectedItem.width / 12) * scale));
+                selectedItem.y = Math.max(0, Math.min(selectedItem.y, canvas.height - (selectedItem.height / 12) * scale));
+                
+                drawRoom();
+            }
+        });
+
+        canvas.addEventListener('mouseup', () => {
+            isDragging = false;
+        });
+
+        // Delete with keyboard
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Delete' && selectedItem) {
+                furnitureItems = furnitureItems.filter(item => item !== selectedItem);
+                selectedItem = null;
+                drawRoom();
+            }
+        });
+
+        // Initialize
+        updateRoom();
+    </script>
+</body>
+</html>
